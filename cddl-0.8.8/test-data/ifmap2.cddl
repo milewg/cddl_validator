@@ -1,0 +1,21 @@
+response =
+  ["ifmap", "response",
+    [ ? validation-attributes ],
+    [ response-choice ]]
+
+response-choice = (
+    error-result // poll-result // search-result // subscribe-received //
+    publish-received // purge-publisher-received // new-session-result //
+    renew-session-result // end-session-result
+)
+
+error-result = 1
+poll-result = 2
+search-result = 3
+subscribe-received = 4
+publish-received = 5
+purge-publisher-received = 6
+new-session-result = 7
+renew-session-result = 8
+end-session-result = 9
+validation-attributes = (10, 11)

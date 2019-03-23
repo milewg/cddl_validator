@@ -1,0 +1,13 @@
+person = {(
+  age: int,
+  name: tstr,
+  collar: color,
+  )}
+
+dog = {(
+  age: int,
+  name: tstr,
+  employer: tstr,
+  )}
+
+color = "red"

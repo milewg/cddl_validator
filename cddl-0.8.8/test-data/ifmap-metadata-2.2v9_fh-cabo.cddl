@@ -1,0 +1,239 @@
+
+
+$$metadata //= (access-request-device // access-request-ip // access-request-mac //
+    authenticated-as // authenticated-by // capability // device-attribute //
+    device-characteristic // device-ip // discovered-by // enforcement-report //
+    event // ip-mac // layer2-information // location // request-for-investigation //
+    role // unexpected-behavior // wlan-information)
+
+
+client-time = ("opmeta", "client-time",
+    [ single-value-metadata-attributes,
+      "current-time", tdate
+    ], [])
+
+; list every capability explicitly?
+server-capability = ("opmeta", "server-capability",
+    [ single-value-metadata-attributes,
+    ],
+    [
+    ["", "capability", [], tstr],
+    ]
+)
+$$metadata //= (client-time // server-capability)
+
+adm-dom = (
+  "administrative-domain", tstr,
+)
+
+access-request =
+  ("ifmap", "access-request",
+    [ ? adm-dom,
+     "name", tstr
+    ],
+    [])
+
+device = ("ifmap", "device", [], [device-type])
+device-type =( ("ifmap","aik-name", [], tstr) //
+  ("ifmap","name", [], tstr))
+
+identity = ("ifmap", "identity",
+    [ ? adm-dom,
+     "name", tstr,
+     "type", ("aik-name" / "distinguished-name" / "dns-name" / "email-address" /
+                "hip-hit" / "kerberos-principal" / "trusted-platform-module" /
+                "username" / "other"),
+     "other-type-definition", tstr
+    ],
+    [])
+
+ip-address = ("ifmap", "ip-address",
+    [ ? adm-dom,
+      "value", tstr,
+      "type", &("IPv4" / "IPv6")
+    ],
+    [])
+
+mac-address = ("ifmap", "mac-address",
+    [ ? adm-dom,
+      "value", tstr,
+    ],
+    [])
+
+$$identifier //= ( access-request // device // identity // ip-address // mac-address )
+
+metadata-attributes = (
+    "ifmap-publisher-id", tstr,
+    "ifmap-timestamp", tdate,
+    "ifmap-timestamp-fraction", tstr
+    )
+
+single-value-metadata-attributes = (
+    ? metadata-attributes,
+    "ifmap-cardinality", "singleValue"
+    )
+
+multi-value-metadata-attributes = (
+    ? metadata-attributes,
+    "ifmap-cardinality", "multiValue"
+    )
+
+access-request-device = ("meta", "access-request-device",
+    [ single-value-metadata-attributes ], [])
+
+access-request-ip = ("meta", "access-request-ip",
+    [ single-value-metadata-attributes ], [])
+
+access-request-mac = ("meta", "access-request-mac",
+    [ single-value-metadata-attributes ], [])
+
+authenticated-as = ("meta", "authenticated-as",
+    [ single-value-metadata-attributes ], [])
+
+authenticated-by = ("meta", "authenticated-by",
+    [ single-value-metadata-attributes ], [])
+
+capability = ("meta", "capability",
+    [ multi-value-metadata-attributes ],
+    [ ? adm-dom,
+      "name", tstr
+    ])
+
+device-attribute = ("meta", "device-attribute",
+    [ multi-value-metadata-attributes ], 
+    [ "name", tstr
+    ])
+
+administrative-domain = ("ifmap", "administrative-domain", [], tstr)
+manufacturer = ("", "manufacturer", [], tstr)
+model = ("", "model", [], tstr)
+os = ("", "os", [], tstr)
+os-version = ("", "os-version", [], tstr)
+type = ("", "type", [],
+     ("p2p" / "cve" / "botnet infection" / "worm infection" / "excessive flows" /
+      "behavioral change" / "policy violation" / "other"))
+discovered-time = ("", "discovered-time", [], tdate)
+discoverer-id = ("", "discoverer-id", [], tstr)
+discovery-method = ("", "discovery-method", [], tstr)
+name = ("", "name", [], tstr)
+magnitude = ("", "magnitude", [], 0..100)
+confidence = ("", "confidence", [], 0..100)
+significance = ("", "significance", [], ("critical" / "important" / "informational"))
+information = ("", "information", [], tstr)
+vulnerability-uri = ("", "vulnerability-uri", [], uri)
+enforcement-action = ("", "enforcement-action", [], tstr)
+other-type-definition = ("", "other-type-definition", [], tstr)
+enforcement-reason = ("", "enforcement-reason", [], tstr)
+start-time = ("", "start-time", [], tdate)
+end-time = ("", "end-time", [], tdate)
+dhcp-server = ("", "dhcp-server", [], tstr)
+vlan = ("", "vlan", [], uint)
+vlan-name = ("", "vlan-name", [], uint)
+port = ("", "port", [], uint)
+location-information = ("", "location-information",
+    ( "type", tstr,
+      "value", tstr), [])
+qualifier = ("", "qualifier", [], tstr)
+
+device-characteristic = ("meta", "device-characteristic",
+    [ multi-value-metadata-attributes ],
+    [ ? manufacturer,
+      ? model,
+      ? os,
+      ? os-version,
+      * type,
+      discovered-time,
+      discoverer-id,
+      + discovery-method
+    ])
+
+device-ip = ("meta", "device-ip",
+    [ single-value-metadata-attributes ], [ device, ip-address])
+
+discovered-by = ("meta", "discovered-by",
+    [ single-value-metadata-attributes ], [])
+
+enforcement-report = ("meta", "enforcement-report",
+    [ multi-value-metadata-attributes ],
+    [ enforcement-action,
+      other-type-definition,
+      enforcement-reason
+    ])
+
+event = ("meta", "event",
+    [ multi-value-metadata-attributes ],
+    [ name,
+      discovered-time,
+      discoverer-id,
+      magnitude,
+      confidence,
+      significance,
+      ? type,
+      ? other-type-definition,
+      ? information,
+      ? vulnerability-uri
+    ])
+
+ip-mac = ("meta", "ip-mac",
+    [ multi-value-metadata-attributes ],
+    [ ? start-time,
+      ? end-time,
+      ? dhcp-server
+    ])
+
+layer2-information = ("meta", "layer2-information",
+    [ multi-value-metadata-attributes ],
+    [ ? vlan,
+      ? vlan-name,
+      ? port,
+      ? adm-dom
+    ])
+
+location = ("meta", "location",
+    [ multi-value-metadata-attributes ],
+    [ discovered-time,
+      discoverer-id,
+      + location-information
+    ])
+
+request-for-investigation = ("meta", "request-for-investigation",
+    [ multi-value-metadata-attributes ],
+    [ ? qualifier ])
+
+role = ("meta", "role",
+    [ multi-value-metadata-attributes ],
+    [ ? administrative-domain,
+      name
+    ])
+
+unexpected-behavior = ("meta", "unexpected-behavior",
+    [ multi-value-metadata-attributes ],
+    [ discovered-time,
+      discoverer-id,
+      ? information,
+      magnitude,
+      ? confidence,
+      significance,
+      ? type
+    ])
+
+wlan-security-type = "open" / "wep" / "tkip" / "ccmp" / "bip" / "other"
+
+ssid = ("", "ssid", [], tstr)
+ssid-unicast-security = ("", "ssid-unicast-security",
+    [ ? other-type-definition ],
+    [ wlan-security-type ])
+ssid-group-security = ("", "ssid-group-security",
+    [ ? other-type-definition ],
+    [ wlan-security-type ])
+ssid-management-security = ("", "ssid-management-security",
+    [ ? other-type-definition ],
+    [ wlan-security-type ])
+
+wlan-information = ("meta", "wlan-information",
+    [ single-value-metadata-attributes ],
+    [ ? ssid,
+      + ssid-unicast-security,
+      ssid-group-security,
+      + ssid-management-security
+    ])

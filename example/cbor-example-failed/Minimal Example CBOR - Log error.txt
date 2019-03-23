@@ -1,0 +1,4 @@
+*** Ignoring .default for now.
+CDDL validation failure
+{"GenerationTime"=>8("2015-07-18T09:00:00-05:00"), "Contact"=>[{"type"=>"organization", "role"=>"creator", "Email"=>[{"EmailTo"=>"contact@csirt.example.com"}]}]}
+"[8(\"2015-07-18T09:00:00-05:00\"), [:prim, 6, 0, [:anno, :regexp, [:prim, 3], [:text, \"\\\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[1-2]\\\\d|3[0-1])[Tt]([0-1]\\\\d|2[0-3]):([0-5]\\\\d):([0-5]\\\\d)(\\\\.\\\\d+)?([Zz]|[+\\\\-](?:[0-1]\\\\d|2[0-3]):[0-5]\\\\d)\"]]], nil] -- cannot complete (false, 1)"

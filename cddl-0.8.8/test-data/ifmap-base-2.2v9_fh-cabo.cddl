@@ -1,0 +1,149 @@
+messages = request / response
+
+request = new-session-request / end-session / renew-session / publish-request / search-request / subscribe-request / poll-request
+        / purge-publisher-request / $ExtendedRequestTypes
+
+error-code = "AccessDenied" / "Failure" / "InvalidIdentifier" / "InvalidIdentifierType" /
+             "IdentifierTooLong" / "InvalidMetadata" / "InvalidSchemaVersion" / "InvalidSessionID" /
+             "MetadataTooLong" / "SearchResultsTooBig" / "PollResultsTooBig" / "SystemError" / $ExtendedErrorCodeTypes
+
+error-result =
+  ("ifmap", "error-result",
+  [ ],
+  [ ? "name", ? tstr,
+    "error-code", error-code,
+    "error-string", tstr
+  ])
+
+poll-result = ("", "poll-result", [], [ *(search-result // error-result)])
+
+response-choice = (error-result // poll-result // search-result // subscribe-received //
+                  publish-received // purge-publisher-received // new-session-result //
+                  renew-session-result // end-session-result // $ExtendedResponses )
+
+purge-publisher-received =
+  ("", "purge-publisher-received", [], [])
+
+purge-publisher-request =
+  ["ifmap", "purge-publisher",
+    [ "ifmap-publisher-id", tstr,
+      session-attributes
+    ],
+    []]
+
+; needs to be constructed according to IF-MAP Filter syntax
+filter-type = tstr
+
+poll-request =
+  ["ifmap", "poll",
+    [ session-attributes,
+      validation-attributes
+    ],
+    []]
+
+subscribe-received =
+  ("", "subscribe-received", [], [])
+
+subscribe-request =
+  ["ifmap", "subscribe",
+    [ session-attributes,
+      validation-attributes
+    ],
+    [ 1*(subscribe-update // subscribe-delete)
+    ]]
+
+subscribe-delete =
+  ("", "delete",
+    [ "name", tstr,
+    ],
+    [])
+
+subscribe-update =
+  ("", "update",
+    [ "match-links", filter-type,
+      "max-depth", uint,
+      "terminal-identifier-type", tstr,
+      "max-size", uint,
+      "result-filter", filter-type,
+      "name", tstr,
+    ],
+    [ $$identifier ])
+search-request =
+  ["ifmap", "search",
+    [ session-attributes,
+      validation-attributes,
+      "match-links", filter-type,
+      "max-depth", uint,
+      "terminal-identifier-type", tstr,
+      "max-size", uint,
+      "result-filter", filter-type
+    ],
+    [ $$identifier
+    ]]
+
+search-result =
+  ("", "search-result",
+    ["name", tstr],
+    [ *result-item])
+
+result-item =
+  ("", "result-item",
+    [],
+    [ 1*2 $$identifier,
+      "metadata", metadata-list-type
+    ])
+
+publish-request =
+  ["ifmap", "publish",
+    [ session-attributes,
+    ? validation-attributes
+    ],
+    [+ (update-request // notify-request // delete-request) ]]
+
+update-request =
+  ("", "update", [ ? lifetime-attributes],
+                 [ 1*2 $$identifier, metadata-list-type ])
+notify-request = ("", "notify", [ ? lifetime-attributes], [ 1*2 $$identifier])
+delete-request = ("", "delete", [ "filter", tstr], [])
+
+publish-received =
+  ("", "publish-received", [], [])
+
+renew-session = ["ifmap", "renew-session", [ ? session-attributes ], []]
+renew-session-result = ("", "renew-session-result", [], [])
+
+end-session = ["ifmap", "end-session", [], []]
+end-session-result =
+  ("", "end-session-result", [], [])
+
+new-session-request =
+  ["ifmap", "new-session",
+    [ ? ("max-poll-result-size", uint)],
+    []]
+
+new-session-result =
+  ("", "new-session-result",
+    [ session-attributes,
+      "ifmap-publisher-id", tstr,
+      "max-poll-result-size", uint,
+    ],
+    [])
+
+session-attributes = (
+  "session-id", tstr
+)
+
+validation-attributes = (
+  "validation", ("None" / "BaseOnly" / "MetadataOnly" / "All")
+)
+
+lifetime-attributes = (
+  "lifetime", ("session" / "forever")
+  )
+
+response = 
+  ["ifmap", "response",
+    [ ? validation-attributes ],
+    [ response-choice ]]
+
+metadata-list-type = ["", "metadata", [], [ *$$metadata ]]

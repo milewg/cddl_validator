@@ -1,0 +1,42 @@
+root = nameserver / entity ; just to root things here
+
+nameserver = {
+  name: fqdn,
+  ipAddresses: [* ipaddress],
+  common,
+}
+
+entity = {
+  names: [* string],
+  roles: [* string],
+  postalAddress: [* string],
+  emails: [* email],
+  phones: {
+      office: [* phone],
+      fax: [* phone],
+      mobile: [* phone],
+  },
+  common,
+}
+
+common = (
+  handle: string,
+  status: [* string],
+  remarks: [* string],
+  uris: [* { type: string, "uri": uri }],
+  port43: fqdn,
+  sponsoredBy: string,
+  resoldBy: string,
+  registrationBy: string,
+  registrationDate: tdate,
+  lastChangedDate: tdate,
+  lastChangedBy: string,
+)
+
+string = tstr
+email = tstr
+phone = tstr
+fqdn = tstr
+ipaddress = ip4 / ip6
+ip4 = bstr ; could pull a #2.4 here, but don't
+ip6 = bstr ; could pull a #2.16 here, but don't

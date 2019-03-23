@@ -1,0 +1,14 @@
+
+foo = { 1*relement }
+
+context-element = 4711
+
+relement = $$relement .within relement-generic
+
+relement-generic = ( relement-codepoint => relement-value ) ; [1]
+relement-codepoint = uint                            ; [1]
+relement-value     = any                             ; [1]
+
+$$relement //= ( &(sender-loop-count:1) => 1..255 )    ; [2]
+$$relement //= ( &(srv-element:2) => context-element ) ; [2]
+

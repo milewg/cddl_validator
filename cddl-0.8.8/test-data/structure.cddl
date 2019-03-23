@@ -1,0 +1,9 @@
+Geography = [
+  city           : tstr
+  gpsCoordinates : GpsCoordinates
+]
+
+GpsCoordinates = {
+  longitude      : uint            ; multiplied by 10^7
+  latitude       : uint            ; multiplied by 10^7
+}

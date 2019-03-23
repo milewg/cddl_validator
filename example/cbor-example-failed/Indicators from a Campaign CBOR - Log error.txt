@@ -1,0 +1,4 @@
+*** Ignoring .default for now.
+CDDL validation failure
+{"IndicatorID"=>{"id"=>"G90823490", "name"=>"csirt.example.com", "version"=>1}, "Description"=>["C2 domains"], "StartTime"=>0("2014-12-02T11:18:00-05:00"), "Observable"=>{"BulkObservable"=>{"type"=>"ipv6-addr", "BulkObservableList"=>"kj290023j09r34.example.com"}}}
+"[1, [:prim, 3], \"[1, [:prim, 3], nil] -- cannot complete (false, 1)\"] -- cannot complete (false, 1)"

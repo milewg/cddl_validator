@@ -1,0 +1,2 @@
+foo = { foo: bool, "foob" => bar, * tstr => uint }
+bar = "blba"

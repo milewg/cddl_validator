@@ -1,0 +1,5 @@
+   top = { topgroup }
+
+   topgroup = ( first: tstr, second: tstr,
+            (option1: uint //
+            option2: uint) )

@@ -1,0 +1,15 @@
+element = [ns, gi, attr, elts]
+
+ns = text / nil
+; can be name syntax or URI
+
+gi = text ; name syntax
+
+attr = { * label => any }
+
+label = text / int
+
+elts = value / [* element]
+; could allow values inside array for mixed content
+
+value = int / text

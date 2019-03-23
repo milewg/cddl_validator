@@ -1,0 +1,3 @@
+*** Map entry without member key given, look for syntax problems around the %%% markers:
+ [[:member, 1, 1, [:text, "version"], [:prim, 3]],  %%% [:member, 0, 1, nil, [:type1, [:text, ""], [:anno, :regexp, [:prim, 3], [:text, "[a-zA-Z]{1,8}(-[a-zA-Z0-9]{1,8})*"]]]] %%% , [:member, 0, 1, [:text, "format-id"], [:prim, 3]], [:member, 0, 1, [:text, "private-enum-name"], [:prim, 3]], [:member, 0, 1, [:text, "private-enum-id"], [:prim, 3]], [:member, 1, 1, [:text, "Incident"], [:array, [:member, 1, Infinity, nil, [:map, [:member, 1, 1, [:text, "purpose"], [:type1, [:text, "traceback"], [:text, "mitigation"], [:text, "reporting"], [:text, "watch"], [:text, "o
+Format of file CDDL-ErrKeyName2.txt is invalid

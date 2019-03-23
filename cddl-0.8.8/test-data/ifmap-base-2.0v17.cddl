@@ -1,0 +1,392 @@
+messages = request / response
+
+request = new-session-request / end-session / renew-session / publish-request / search-request / subscribe-request / poll-request
+        / purge-publisher-request
+
+; response = subscribe-received / publish-received / purge-publisher-received / results
+
+;results = error-result / poll-result / search-result / new-session-result / end-session-result
+
+message<namespace,name,attributes,content> = [
+  namespace: namespace,
+  name: name,
+  attributes: attributes,
+  content: content
+]
+
+error-code = "AccessDenied" / "Failure" / "InvalidIdentifier" / "InvalidIdentifierType" /
+             "IdentifierTooLong" / "InvalidMetadata" / "InvalidSchemaVersion" / "InvalidSessionID" /
+             "MetadataTooLong" / "SearchResultsTooBig" / "PollResultsTooBig" / "SystemError"
+
+error-result =
+  message<"ifmap", "error-result",
+  [ ],
+  [ ? "name", ? tstr,
+    "error-code", error-code,
+    "error-string", tstr
+  ]>
+
+poll-result = ["", "poll-result", [], [ *(search-result / error-result)]]
+
+response-choice = error-result / poll-result / search-result / subscribe-received /
+                  publish-received / purge-publisher-received / new-session-result /
+                  renew-session-result / end-session-result 
+
+response = 
+  message<"ifmap", "response",
+    [ ? validation-attributes ],
+    [ response-choice ]>
+
+purge-publisher-received =
+  ["", "purge-publisher-received", [], []]
+
+purge-publisher-request =
+  message<"ifmap", "purge-publisher",
+    [ "ifmap-publisher-id", tstr,
+      session-attributes
+    ],
+    []>
+
+; needs to be constructed according to IF-MAP Filter syntax
+filter-type = tstr
+
+poll-request =
+  message<"ifmap", "poll",
+    [ session-attributes,
+      validation-attributes
+    ],
+    []>
+
+subscribe-received =
+  ["", "subscribe-received", [], []]
+
+subscribe-request =
+  message<"ifmap", "subscribe",
+    [ session-attributes,
+      validation-attributes
+    ],
+    [ 1*(subscribe-update / subscribe-delete)
+    ]>
+
+subscribe-delete =
+  message<"", "delete",
+    [ "name", tstr,
+    ],
+    []>
+
+subscribe-update =
+  message<"", "update",
+    [ "match-links", filter-type,
+      "max-depth", uint,
+      "terminal-identifier-type", tstr,
+      "max-size", uint,
+      "result-filter", filter-type,
+      "name", tstr,
+    ],
+    [ access-request / identity / ip-address / mac-address / device
+    ]>
+search-request =
+  message<"ifmap", "search",
+    [ session-attributes,
+      validation-attributes,
+      "match-links", filter-type,
+      "max-depth", uint,
+      "terminal-identifier-type", tstr,
+      "max-size", uint,
+      "result-filter", filter-type
+    ],
+    [ access-request / identity / ip-address / mac-address / device
+    ]>
+
+search-result =
+  ["", "search-result",
+    ["name", tstr],
+    [ *result-item]]
+
+result-item =
+  message<"", "result-item",
+    [],
+    [ 1*2(access-request / identity / ip-address / mac-address / device),
+      "metadata", metadata-list-type
+    ]>
+
+publish-request =
+  message<"ifmap", "publish",
+    [ session-attributes, validation-attributes ],
+    [+ (update-request / notify-request / delete-request) ]>
+
+update-request = message<"", "update", [ ? lifetime-attributes], [ 1*2 identifier, metadata-list-type ]>
+notify-request = message<"", "notify", [ ? lifetime-attributes], [ 1*2 identifier ]>
+delete-request = message<"", "delete", [ "filter", tstr], []>
+
+publish-received =
+  ["", "publish-received", [], []]
+
+renew-session = message<"ifmap", "renew-session", [ ? session-attributes ], []>
+renew-session-result = ["", "renew-session-result", [], []]
+
+end-session = message<"ifmap", "end-session", [], []>
+end-session-result =
+  ["", "end-session-result", [], []]
+
+new-session-request =
+  message<"ifmap", "new-session",
+    [ "max-poll-result-size", uint],
+    []>
+
+new-session-result =
+  ["", "new-session-result",
+    [ session-attributes,
+      "ifmap-publisher-id", tstr,
+      "max-poll-result-size", uint,
+    ],
+    []]
+
+identifier = access-request / device / identity / ip-address / mac-address
+
+session-attributes = (
+  "session-id", tstr
+)
+
+validation-attributes = (
+  "validation", ("None" / "BaseOnly" / "MetadataOnly" / "All")
+)
+
+adm-dom = (
+  "administrative-domain", tstr,
+)
+
+lifetime-attributes = (
+  "lifetime", ("session" / "forever")
+)
+
+access-request =
+  message<"ifmap", "access-request",
+    [ ? adm-dom,
+     "name", tstr
+    ],
+    []>
+
+device = message<"ifmap", "device", [], [device-type]>
+device-type =
+  message<"ifmap","aik-name", [], tstr> /
+  message<"ifmap","name", [], tstr>
+
+identity = message<"ifmap", "identity",
+    [ ? adm-dom,
+     "name", tstr,
+     "type", ("aik-name" / "distinguished-name" / "dns-name" / "email-address" /
+                "hip-hit" / "kerberos-principal" / "trusted-platform-module" /
+                "username" / "other"),
+     "other-type-definition", tstr
+    ],
+    []>
+
+ip-address = message<"ifmap", "ip-address",
+    [ ? adm-dom,
+      "value", tstr,
+      "type", ("IPv4" / "IPv6")
+    ],
+    []>
+
+mac-address = message<"ifmap", "mac-address",
+    [ ? adm-dom,
+      "value", tstr,
+    ],
+    []>
+
+metadata-attributes = (
+    "ifmap-publisher-id", tstr,
+    "ifmap-timestamp", tdate,
+    "ifmap-timestamp-fraction", tstr
+    )
+
+; optional metadata attributes? not yet possible
+single-value-metadata-attributes = (
+    ? metadata-attributes,
+    "ifmap-cardinality", "singleValue"
+    )
+
+multi-value-metadata-attributes = (
+    ? metadata-attributes,
+    "ifmap-cardinality", "multiValue"
+    )
+
+access-request-device = message<"meta", "access-request-device",
+    [ single-value-metadata-attributes ], []>
+
+access-request-ip = message<"meta", "access-request-ip",
+    [ single-value-metadata-attributes ], []>
+
+access-request-mac = message<"meta", "access-request-mac",
+    [ single-value-metadata-attributes ], []>
+
+authenticated-as = message<"meta", "authenticated-as",
+    [ single-value-metadata-attributes ], []>
+
+authenticated-by = message<"meta", "authenticated-by",
+    [ single-value-metadata-attributes ], []>
+
+capability = message<"meta", "capability",
+    [ multi-value-metadata-attributes ],
+    [ ? adm-dom,
+      "name", tstr
+    ]>
+
+device-attribute = message<"meta", "device-attribute",
+    [ multi-value-metadata-attributes ], 
+    [ "name", tstr
+    ]>
+
+manufacturer = message<"", "manufacturer", [], tstr>
+model = message<"", "model", [], tstr>
+os = message<"", "os", [], tstr>
+os-version = message<"", "os-version", [], tstr>
+type = message<"", "type", [],
+     ("p2p" / "cve" / "botnet infection" / "worm infection" / "excessive flows" /
+      "behavioral change" / "policy violation" / "other")>
+discovered-time = message<"", "discovered-time", [], tdate>
+discoverer-id = message<"", "discoverer-id", [], tstr>
+discovery-method = message<"", "discovery-method", [], tstr>
+name = message<"", "name", [], tstr>
+magnitude = message<"", "magnitude", [], 0..100>
+confidence = message<"", "confidence", [], 0..100>
+significance = message<"", "significance", [], ("critical" / "important" / "informational")>
+information = message<"", "information", [], tstr>
+vulnerability-uri = message<"", "vulnerability-uri", [], uri>
+enforcement-action = message<"", "enforcement-action", [], tstr>
+other-type-definition = message<"", "other-type-definition", [], tstr>
+enforcement-reason = message<"", "enforcement-reason", [], tstr>
+start-time = message<"", "start-time", [], tdate>
+end-time = message<"", "end-time", [], tdate>
+dhcp-server = message<"", "dhcp-server", [], tstr>
+vlan = message<"", "vlan", [], uint>
+vlan-name = message<"", "vlan-name", [], uint>
+port = message<"", "port", [], uint>
+location-information = message<"", "location-information",
+    [ "type", tstr,
+      "value", tstr], []>
+qualifier = message<"", "qualifier", [], tstr>
+
+device-characteristic = message<"meta", "device-characteristic",
+    [ multi-value-metadata-attributes ],
+    [ ? manufacturer,
+      ? model,
+      ? os,
+      ? os-version,
+      * type,
+      discovered-time,
+      discoverer-id,
+      + discovery-method
+    ]>
+
+device-ip = message<"meta", "device-ip",
+    [ single-value-metadata-attributes ], [ device, ip-address]>
+
+discovered-by = message<"meta", "discovered-by",
+    [ single-value-metadata-attributes ], []>
+
+enforcement-report = message<"meta", "enforcement-report",
+    [ multi-value-metadata-attributes ],
+    [ enforcement-action,
+      other-type-definition,
+      enforcement-reason
+    ]>
+
+event = message<"meta", "event",
+    [ multi-value-metadata-attributes ],
+    [ name,
+      discovered-time,
+      discoverer-id,
+      magnitude,
+      confidence,
+      significance,
+      ? type,
+      ? other-type-definition,
+      ? information,
+      ? vulnerability-uri
+    ]>
+
+ip-mac = message<"meta", "ip-mac",
+    [ multi-value-metadata-attributes ],
+    [ ? start-time,
+      ? end-time,
+      ? dhcp-server
+    ]>
+
+layer2-information = message<"meta", "layer2-information",
+    [ multi-value-metadata-attributes ],
+    [ ? vlan,
+      ? vlan-name,
+      ? port,
+      ? adm-dom
+    ]>
+
+location = message<"meta", "location",
+    [ multi-value-metadata-attributes ],
+    [ discovered-time,
+      discoverer-id,
+      + location-information
+    ]>
+
+request-for-investigation = message<"meta", "request-for-investigation",
+    [ multi-value-metadata-attributes ],
+    [ ? qualifier ]>
+
+role = message<"meta", "role",
+    [ multi-value-metadata-attributes ],
+    [ ? adm-dom,
+      name
+    ]>
+
+unexpected-behavior = message<"meta", "unexpected-behavior",
+    [ multi-value-metadata-attributes ],
+    [ discovered-time,
+      discoverer-id,
+      ? information,
+      magnitude,
+      ? confidence,
+      significance,
+      ? type
+    ]>
+
+wlan-security-type = "open" / "wep" / "tkip" / "ccmp" / "bip" / "other"
+
+ssid = message<"", "ssid", [], tstr>
+ssid-unicast-security = message<"", "ssid-unicast-security",
+    [ ? other-type-definition ],
+    [ wlan-security-type ]>
+ssid-group-security = message<"", "ssid-group-security",
+    [ ? other-type-definition ],
+    [ wlan-security-type ]>
+ssid-management-security = message<"", "ssid-management-security",
+    [ ? other-type-definition ],
+    [ wlan-security-type ]>
+
+wlan-information = message<"meta", "wlan-information",
+    [ single-value-metadata-attributes ],
+    [ ? ssid,
+      + ssid-unicast-security,
+      ssid-group-security,
+      + ssid-management-security
+    ]>
+
+client-time = message<"opmeta", "client-time",
+    [ single-value-metadata-attributes,
+      "current-time", tdate
+    ], []>
+
+; list every capability explicitly?
+server-capability = message<"opmeta", "server-capability",
+    [ single-value-metadata-attributes,
+    ],
+    [ message<"", "capability", [], tstr>,
+    ]>
+
+metadata-list-type = [
+  *(access-request-device / access-request-ip / access-request-mac /
+    authenticated-as / authenticated-by / capability / device-attribute /
+    device-characteristic / device-ip / discovered-by / enforcement-report /
+    event / ip-mac / layer2-information / location / request-for-investigation /
+    role / unexpected-behavior / wlan-information
+    )]

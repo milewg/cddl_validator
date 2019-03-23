@@ -1,0 +1,68 @@
+COSE_MSG = [ 1, COSE_Sign ] / [2, COSE_encrypt] / [3, COSE_mac]
+
+
+COSE_Sign = (
+    headers,
+    payload : opt<bstr>,
+    signatures: ([+[COSE_signature]] / [COSE_signature])
+)
+
+COSE_SignMessage = #6.999([ COSE_Sign ])
+
+keys = int / tstr
+header_map = {+ keys => any}
+
+opt<t> = t / nil
+
+headers = (
+    protected: opt<bstr>,
+    unprotected: opt<header_map>
+)
+
+COSE_signature =  (
+    headers,
+    signaturne : bstr
+)
+
+Sig_structure = [
+    headers,
+    payload : bstr
+]
+
+COSE_encrypt = (
+  headers,
+  iv : opt<bstr>,
+  aad : opt<bstr>,
+  ciphertext : opt<bstr>,
+  recipients : ([+COSE_encrypt_a] / [COSE_encrypt] / nil)
+)
+
+COSE_encrypt_a = [COSE_encrypt]
+
+Enc_structure = [
+   protected : opt<bstr>,
+   aad : opt<bstr>
+]
+
+COSE_mac = (
+   headers,
+   payload : bstr,
+   tag : bstr,
+   recipients : ([+COSE_encrypt_a] / [COSE_encrypt] / nil)
+)
+
+MAC_structure = [
+   protected : opt<bstr>
+   payload : bstr
+]
+
+COSE_Key = {
+    "kty" : tstr,
+    ? "use" : tstr,
+    ? "key_ops" : [+tstr],
+    ? "alg" : tstr,
+    ? "kid" : tstr,
+    * keys => values
+}
+
+COSE_KeySet = [+COSE_Key]

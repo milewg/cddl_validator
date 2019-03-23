@@ -1,0 +1,10 @@
+*** Look for syntax problems around the %%% markers:
+ Incident: [+ Incident]
+ ? AdditionalData: [+ ExtensionType]
+}
+
+duration = "second" / "minute"  %%%%%%"hour" / "day" / "month" / "quarter" /
+           "year" / "ext-value"
+lang = "" / text .regexp "[
+*** Parse error at 267 upto 267 of 20368 (21714).
+Format of file CDDL-ErrSyntax.txt is invalid

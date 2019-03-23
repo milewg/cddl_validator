@@ -1,0 +1,90 @@
+   grasp-message = message
+
+   session-id = 0..16777215
+   ; that is up to 24 bits
+
+   message /= discovery-message
+   discovery-message = [M_DISCOVERY, session-id, objective]
+
+   message /= response-message
+   response-message = [M_RESPONSE, session-id,
+                      (+locator-option // divert-option // objective)]
+
+   message /= request-message
+   request-message = [M_REQUEST, session-id, objective]
+
+   message /= negotiation-message
+   negotiation-message = [M_NEGOTIATE, sid: session-id, objective]
+
+   message /= end-message
+   end-message = [M_END, session-id, (accept-option / decline-option)]
+
+   message /= wait-message
+   wait-message = [M_WAIT, session-id, waiting-time-option]
+
+   divert-option = [O_DIVERT, +locator-option]
+
+   accept-option = [O_ACCEPT]
+
+   decline-option = [O_DECLINE]
+
+   waiting-time-option = [O_WAITING, option-waiting-time]
+   option-waiting-time = 0..4294967295 ; in milliseconds
+
+   option-device-id = [O_DEVICE_ID, bytes]
+
+   locator-option /= ipv4-locator-option
+   ipv4-locator-option = bytes .size 4
+   ; this is simpler than [O_IPv4_LOCATOR, bytes .size 4]
+
+   locator-option /= ipv6-locator-option
+   ipv6-locator-option = bytes .size 16
+
+   locator-option /= fqdn-locator-option
+   fqdn-locator-option = [O_FQDN_LOCATOR, text]
+
+   locator-option /= url-locator-option
+   url-locator-option = [O_URL_LOCATOR, text]
+
+   objective-flags = uint .bits objective-flag
+
+   objective-flag = &(
+   D: 0
+   N: 1
+   S: 2
+   )
+
+   ; D means valid for discovery only
+   ; N means valid for discovery and negotiation
+   ; S means valid for discovery and synchronization
+
+   objective /= generic-obj
+   generic-obj = [objective-name, objective-flags, loop-count, ?any]
+
+   objective /= vendor-obj
+   vendor-obj = [{"PEN":pen}, objective-name, objective-flags,
+                 loop-count, ?any]
+
+   ; A PEN is used to distinguish vendor-specific options.
+
+   pen = 0..4294967295
+   objective-name = tstr
+   loop-count = 0..255
+
+   ; Constants
+
+   M_DISCOVERY = 1
+
+   M_RESPONSE = 2
+   M_REQUEST = 3
+   M_NEGOTIATE = 4
+   M_END = 5
+   M_WAIT = 6
+
+   O_DIVERT = 100
+   O_ACCEPT = 101
+   O_DECLINE = 102
+   O_WAITING = 103
+   O_DEVICE_ID = 104
+   O_FQDN_LOCATOR = 105
+   O_URL_LOCATOR = 106

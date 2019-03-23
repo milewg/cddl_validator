@@ -1,0 +1,5 @@
+*** Ignoring .default for now.
+CDDL validation failure
+{"MonetaryImpact"=>{"value"=>10000000, "currency"=>"JPY"}}
+"[{\"MonetaryImpact\"=>{\"value\"=>10000000, \"currency\"=>\"JPY\"}}, [:map, [:member, 1, 1, [:text, \"IntendedImpact\"], [:map, [:member, 0, 1, [:text, \"severity\"], [:type1, [:text, \"none\"], [:text, \"low\"], [:text, \"medium\"], [:text, \"high\"], [:text, \"unknown\"], [:anno, :default, [:text, \"ext-value\"], [:text, \"unknown\"]]]], [:member, 0, 1, [:text, \"ext-severity\"], [:prim, 3]], [:member, 1, 1, [:text, \"type\"], [:type1, [:text, \"breach-proprietary\"], [:text, \"breach-privacy\"], [:text, \"breach-credential\"], "
+

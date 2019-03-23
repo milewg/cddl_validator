@@ -1,0 +1,97 @@
+grasp-message = message
+
+session-id = 0..16777215
+; that is still 24 bits; we could pick any size we want
+
+message /= discovery-message
+discovery-message = [M_DISCOVERY, session-id, objective]
+
+message /= response-message
+response-message = [M_RESPONSE, session-id, *locator-option / divert-option / objective]
+
+message /= request-message
+request-message = [M_REQUEST, session-id, objective]
+
+message /= negotiation-message
+negotiation-message = [M_NEGOTIATE, session-id, objective]
+
+message /= end-message
+end-message = [M_END, session-id, accept-option / decline option]
+
+message /= wait-message
+wait-message = [M_WAIT, session-id, waiting-time-option]
+
+
+M_DISCOVERY =  1
+M_RESPONSE = 2
+M_REQUEST = 3
+M_NEGOTIATE = 4
+M_END = 5
+M_WAIT = 6
+
+option /= divert-option
+divert-option = [OPTION_DIVERT, *locator-option]
+OPTION_DIVERT = 372             ; use section numbers for now
+
+option /= accept-option
+accept-option = [OPTION_ACCEPT]
+OPTION_ACCEPT = 373
+
+option /= decline-option
+decline-option = [OPTION_DECLINE]
+OPTION_DECLINE = 374
+
+option /= waiting-time-option
+waiting-time-option = [OPTION_WAITING, option-waiting-time]
+OPTION_WAITING = 375
+option-waiting-time = 0..4294967295 ; in milliseconds
+
+option /= option-device-id
+option-device-id = [OPTION_DEVICE_ID, bytes]
+OPTION_DEVICE_ID = 376
+
+locator-option /= ipv4-locator-option
+ipv4-locator-option = bytes .size 4
+; this is simpler than [OPTION_IPv4_LOCATOR, bytes .size 4] -- do we want regularity or simplicity?
+
+locator-option /= ipv6-locator-option
+ipv6-locator-option = bytes .size 16
+
+locator-option /= fqdn-locator-option
+OPTION_FQDN_LOCATOR = 3773
+fqdn-locator-option = [OPTION_FQDN_LOCATOR, text]
+
+locator-option /= url-locator-option
+OPTION_URL_LOCATOR = 3774
+url-locator-option = [OPTION_URL_LOCATOR, text]
+
+objective-flags = uint .bits objective-flag
+
+objective-flag = &(
+D: 0
+N: 1
+S: 2
+)
+
+; D means valid for discovery only
+; N means valid for discovery and negotiation
+; S means valid for discovery and synchronization
+
+option /= objective
+
+objective /= generic-obj
+generic-obj = [objective-name, objective-flags, loop-count, any]
+
+objective /= vendor-obj
+vendor-obj = [{"PEN":pen}, objective-name, objective-flags, loop-count, any]
+
+; Objectives have names rather than numbers here. But the names need
+; to be unique. Registry needed, it seems.
+
+; A PEN is used to distinguish vendor-specific options. Or we could
+; decide to use a domain name. Anything unique will do.
+
+pen = 0..4294967295
+objective-name = tstr
+loop-count = 0..255
+

@@ -1,0 +1,13 @@
+CellList = {
+  + CellID => {
+    SlotframeID: leafref
+    SlotOffset: uint
+    ChannelOffset: uint
+    LinkType: enumeration
+    CelType: enumeration
+  }
+}
+
+CellID = uint
+leafref = tstr ; TBD
+enumeration = uint ; TBD

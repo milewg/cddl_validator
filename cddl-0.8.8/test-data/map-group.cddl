@@ -1,0 +1,13 @@
+map = {
+ first_group,
+ ? second_group,
+}
+
+first_group = ( e1, e2,)
+second_group = (e3, e4, e5)
+
+e1 = (1: uint)
+e2 = (2: tstr)
+e3 = (3: tdate)
+e4 = (4: tstr)
+e5 = (5: uint)

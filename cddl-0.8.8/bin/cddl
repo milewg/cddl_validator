@@ -1,0 +1,153 @@
+﻿#!/usr/bin/env ruby
+# -*- coding: utf-8 -*-
+# require_relative '../lib/cddl'
+require 'cddl'
+require 'cbor-diagnostic'
+require 'json'
+
+Encoding.default_external = "UTF-8" # wake up, smell the coffee
+
+EX_USAGE = 64
+EX_DATAERR = 65
+
+def usage
+  warn "Usage:"
+  warn "#$0 formatcheck-cbor instance.cbor"
+  warn "#$0 formatcheck-json instance.json"
+  warn "#$0 formatcheck-cddl spec.cddl"
+  warn "#$0 spec.cddl generate [n]"
+  warn "#$0 spec.cddl json-generate [n]"
+  warn "#$0 spec.cddl validate instance.cbor"
+  warn "#$0 spec.cddl validate instance.json"
+  exit EX_USAGE
+end
+
+def read_arg(arg)
+  if arg == "-"
+    STDIN.read
+  else
+    usage unless arg
+    File.read(arg, mode: "rb")
+  end
+end
+
+def parser
+  @parser ||= CDDL::Parser.new(read_arg(ARGV[0]))
+end
+
+def my_pp(v)
+  if $annotate
+    CBOR::PP.pp v
+  else
+    pp v
+  end
+end
+
+def my_diag(v)
+  if $annotate
+    CBOR::PP.pp v
+  else
+    puts v.cbor_diagnostic
+  end
+end
+
+def valid_json(json_instance)
+  JSON.parse(json_instance)
+  true
+rescue JSON::ParserError => e
+  warn e.message
+  false
+end
+
+def valid_cbor(cbor_instance)
+  CBOR.decode(cbor_instance.b)
+  true
+rescue Exception => e
+  warn e.message
+  false
+end
+
+def valid_cddl(cddl_instance)
+  parser_cddl ||= CDDL::Parser.new(read_arg(ARGV[1]))
+  parser_cddl.rules
+  true
+rescue Exception => e
+  warn e.message
+  false
+end
+
+def print_msg_check_format(file_name, is_valid)
+  if is_valid == true
+    print "Format of file #{file_name} is valid"
+  else
+    print "Format of file #{file_name} is invalid"
+  end
+end
+
+begin
+  # Check format JSON and CBOR
+  if ARGV.length == 2
+    case ARGV[0]
+    when /\Aformatcheck-json/
+      json_instance = read_arg(ARGV[1])
+      print_msg_check_format(ARGV[1],valid_json(json_instance))
+      exit EX_USAGE
+    when /\Aformatcheck-cbor/
+      cbor_instance = read_arg(ARGV[1])
+      print_msg_check_format(ARGV[1],valid_cbor(cbor_instance))
+      exit EX_USAGE
+    when /\Aformatcheck-cddl/
+      cddl_instance = read_arg(ARGV[1])
+      print_msg_check_format(ARGV[1],valid_cddl(cddl_instance))
+      exit EX_USAGE
+    end
+  end
+  
+  case ARGV[1]
+  when /\A.p/
+    $annotate = true
+    require_relative '../lib/cbor-pp'
+  end
+  case ARGV[1]
+  when /\Ar/                      # secret
+    $advanced = true
+    my_pp parser.rules
+  when /\Ae/                      # secret
+    $advanced = true
+    puts parser.defines(ARGV[2])
+  when /\Ag/
+    n = 1
+    n = ARGV[2].to_i if ARGV[2]
+    n.times do
+      g = parser.generate
+      if $annotate
+        g = g.cbor_clone if ENV["EXPERIMENTAL_ANNOTATE"]
+        ann = parser.validate(g)
+        # my_pp ann
+        g.cbor_add_annotations_from(ann) rescue nil
+      end
+      my_diag(g)
+    end
+  when /\Aj/
+    n = 1
+    n = ARGV[2].to_i if ARGV[2]
+    n.times do
+      g = parser.generate
+      puts JSON.pretty_generate(g)
+    end
+  when /\Av/
+    instance = read_arg(ARGV[2])
+    instance = CBOR.decode(instance.b) rescue JSON.load(instance)
+    instance = instance.cbor_clone if $annotate && ENV["EXPERIMENTAL_ANNOTATE"]
+    ann = parser.validate(instance)
+    # my_pp ann
+    instance.cbor_add_annotations_from(ann) rescue nil
+    my_diag(instance) if $annotate
+    exit 1 unless ann
+  else
+    usage
+  end
+rescue CDDL::ParseError => e
+  warn e.message
+  exit EX_DATAERR
+end

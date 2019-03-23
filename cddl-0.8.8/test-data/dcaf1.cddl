@@ -1,0 +1,48 @@
+dcaf-msg = sam-information-msg
+         / access-request-msg
+         / ticket-transfer-msg
+         / ticket-grant-msg
+
+sam-information-msg = { sam, ? full-timestamp }
+
+access-request-msg = { sam, sam-ai, full-timestamp }
+
+ticket-transfer-msg = { face, verifier }
+face = (F => { sam-ai, limited-timestamp, lifetime, psk-gen } )
+verifier = (V => shared-secret )
+shared-secret = bstr
+F   = 8
+V   = 9
+
+ticket-grant-msg    = { face, verifier, ? client-info }
+client-info = (cam-ai, full-timestamp, lifetime)
+
+sam = (SAM => abs-uri)
+SAM = 0
+abs-uri = tstr ; .regexp "______"
+
+sam-ai = (SAI => [* auth-info])
+SAI = 1
+auth-info = (uri : tstr, mask : 0..15 )
+
+cam-ai = (CAI => [* auth-info])
+CAI = 2
+
+full-timestamp = (TS => date)
+TS  = 5
+date = tdate / localdate
+localdate = uint
+limited-timestamp = (TS => localdate)
+
+lifetime = (L => period)
+period = uint ; in seconds
+L   = 6
+
+psk-gen = (G => mac-algorithm)
+G   = 7
+mac-algorithm = &( hmac-sha256: 0, hmac-sha384: 1, hmac-sha512: 2 )
+
+; TO DO???
+E   = 3
+K   = 4
+

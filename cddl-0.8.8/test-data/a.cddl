@@ -1,0 +1,9 @@
+col = {color}
+color = 
+(  black: 0,
+  red: 1,
+  green: 2,)
+//
+(  foo: 4,
+  bar: 5,
+  baz: 6,)

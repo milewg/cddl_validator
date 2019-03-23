@@ -1,0 +1,14 @@
+info = (
+  age: int,
+  name: tstr,
+)
+person = {
+    info,
+    employer: tstr,
+    }
+dog = {
+    info,
+    collar: color,
+    }
+
+color = "blue"

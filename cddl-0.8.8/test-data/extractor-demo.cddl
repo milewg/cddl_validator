@@ -1,0 +1,14 @@
+message = [mtype,
+           beer: enum1, wine: bytes, ? optional: text, cantindex: int]
+
+M_ONE = 1
+M_TWO = 2
+M_THREE = 3
+
+mtype = M_ONE / M_TWO / M_THREE
+
+enum1 = &(
+      one: 1
+      two: 2
+      three: 3
+)

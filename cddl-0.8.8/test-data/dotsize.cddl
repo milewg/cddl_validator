@@ -1,0 +1,7 @@
+foo = [a, b, c]
+
+a = uint .size 4
+
+b = bytes .size 4
+
+c = text .size (0..30)
